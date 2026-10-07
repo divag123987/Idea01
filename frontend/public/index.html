@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QlickLeads — RPO</title>
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --b1:#0f2942;--b2:#17395c;--b3:#2563c9;--b4:#3d82c4;--bp:#eaf2fa;
+  --g1:#134532;--g2:#22a06b;--g3:#2f9668;--gp:#e8f5ee;
+  --t1:#0e9aae;--tp:#e6f4f7;--a1:#f0a02a;--ap:#fdf0dd;
+  --r1:#e8615a;--rp:#fbeae8;--p1:#7c5cc4;--pp:#f0eafa;--o1:#c2551f;--op:#fdeee4;
+  --w:#fff;--g50:#f8fafc;--g100:#f1f4f8;--g200:#e4e9f0;--g300:#cdd5e0;
+  --g400:#94a0b3;--g500:#66718a;--g600:#48526b;--g700:#2f374a;--g800:#1b2233;
+  --sw:232px;--rad:16px;--rad-s:10px;
+  --sh:0 1px 3px rgba(15,41,66,.04);--sh-m:0 4px 16px rgba(15,41,66,.07);--sh-l:0 12px 40px rgba(15,41,66,.16);
+  --grad:linear-gradient(135deg,var(--b1) 0%,var(--b2) 55%,#125a48 130%);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#eef2f7;color:var(--g700);min-height:100vh;-webkit-font-smoothing:antialiased;font-size:14px;letter-spacing:-.01em}
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--grad)}
+.login-card{background:#fff;border-radius:14px;padding:38px;width:100%;max-width:400px;box-shadow:var(--sh-l)}
+.err-box{background:var(--rp);color:var(--r1);border-radius:var(--rad-s);padding:10px 14px;font-size:12.5px;margin-bottom:14px;display:none}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:var(--sw);min-width:var(--sw);background:var(--grad);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:50;overflow-y:auto;transition:transform .22s}
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-left .22s}
+body.sb-collapsed .sidebar{transform:translateX(-100%)}
+body.sb-collapsed .main{margin-left:0}
+.sb-logo{padding:16px}
+.sb-logo .box{background:#fff;border-radius:10px;padding:11px 13px;display:flex;align-items:center;justify-content:center}
+.sb-logo img{width:135px;max-width:100%;height:auto;display:block}
+.sb-logo .sub{font-size:10.5px;color:rgba(255,255,255,.45);margin-top:8px;text-align:center}
+.sb-nav{padding:8px;flex:1}
+.sb-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.38);letter-spacing:.09em;text-transform:uppercase;padding:12px 10px 5px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:var(--rad-s);cursor:pointer;color:rgba(255,255,255,.72);font-size:13px;font-weight:500;transition:all .13s;border:none;background:none;width:100%;text-align:left;margin-bottom:1px}
+.nav-item:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.16);color:#fff;font-weight:600}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.28);flex-shrink:0}
+.nav-item.active .nav-dot{background:var(--g2);box-shadow:0 0 6px var(--g2)}
+.sb-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,.1)}
+.sb-user .un{font-size:12.5px;font-weight:600;color:#fff}
+.sb-user .ue{font-size:10.5px;color:rgba(255,255,255,.45)}
+.topbar{height:62px;background:#fff;border-radius:var(--rad);border:1px solid rgba(15,41,66,.06);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:14px;z-index:40;box-shadow:var(--sh);margin:14px 20px 0}
+.topbar h1{font-size:19px;font-weight:700;color:var(--g800);letter-spacing:-.03em}
+.menu-btn{display:inline-flex;align-items:center;justify-content:center;background:none;border:1px solid var(--g200);border-radius:var(--rad-s);color:var(--g600);font-size:16px;cursor:pointer;padding:5px 9px}
+.menu-btn:hover{background:var(--g100);color:var(--b3)}
+.topbar-l{display:flex;align-items:center;gap:13px}
+.topbar-r{display:flex;gap:8px;align-items:center}
+.page{padding:18px 20px 26px;flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s;white-space:nowrap;font-family:inherit}
+.btn-primary{background:var(--b3);color:#fff;border-color:var(--b3);box-shadow:0 2px 8px rgba(37,99,201,.22)}.btn-primary:hover{background:#1d51a8}
+.btn-green{background:var(--g2);color:#fff;border-color:var(--g2)}.btn-green:hover{background:#1a8054}
+.btn-outline{background:#fff;color:var(--g600);border-color:var(--g300)}.btn-outline:hover{border-color:var(--b3);color:var(--b3);background:var(--bp)}
+.btn-ghost{background:transparent;color:var(--g500);border-color:transparent;padding:7px 11px}.btn-ghost:hover{background:var(--g100);color:var(--b3)}
+.btn-danger{background:#fff;color:var(--r1);border-color:#e6b8b3}.btn-danger:hover{background:var(--rp)}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
+.btn-xs{padding:4px 10px;font-size:11.5px;border-radius:7px}
+.btn-block{width:100%;justify-content:center}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.form-row{margin-bottom:13px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.form-label{display:block;font-size:11.5px;font-weight:600;color:var(--g600);margin-bottom:5px}
+.form-label .req{color:var(--r1);margin-left:2px}
+.form-input,.form-select,.form-textarea{width:100%;padding:8px 11px;border:1px solid var(--g300);border-radius:var(--rad-s);font-size:13px;color:var(--g800);background:#fff;font-family:inherit;outline:none;transition:border-color .13s,box-shadow .13s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--b3);box-shadow:0 0 0 3px rgba(37,99,201,.12)}
+.form-textarea{resize:vertical;min-height:72px}
+.form-hint{font-size:11px;color:var(--g400);margin-top:3px}
+.fs{background:var(--g50);border-radius:var(--rad-s);padding:14px;margin-bottom:14px;border:1px solid var(--g200)}
+.fs-title{font-size:10.5px;font-weight:700;color:var(--b3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:11px}
+.card{background:#fff;border-radius:var(--rad);border:1px solid rgba(15,41,66,.06);box-shadow:var(--sh)}
+.card-hdr{padding:16px 20px 13px;border-bottom:1px solid var(--g100);display:flex;align-items:center;justify-content:space-between}
+.card-hdr h3{font-size:15px;font-weight:700;color:var(--g800);letter-spacing:-.02em}
+.card-body{padding:18px 20px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.metric{background:#fff;border-radius:var(--rad);border:1px solid rgba(15,41,66,.06);padding:17px 19px;box-shadow:var(--sh);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.m-ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0}
+.metric.blue .m-ico{background:#2563c9}.metric.green .m-ico{background:#22a06b}.metric.teal .m-ico{background:#0e9aae}
+.metric.amber .m-ico{background:#f0a02a}.metric.red .m-ico{background:#e8615a}.metric.purple .m-ico{background:#7c5cc4}
+.metric.gray .m-ico{background:var(--g400)}
+.m-lbl{font-size:12px;color:var(--g500);font-weight:500;margin-bottom:6px}
+.m-val{font-size:28px;font-weight:700;line-height:1;color:var(--g800);letter-spacing:-.035em}
+.m-sub{font-size:11.5px;color:var(--g400);margin-top:7px}
+.tbl-wrap{overflow-x:auto;border-radius:var(--rad);border:1px solid rgba(15,41,66,.06);background:#fff;box-shadow:var(--sh)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:#f7f9fc;padding:12px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--g500);border-bottom:1px solid var(--g200);white-space:nowrap}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--g100);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#f7f9fc}
+.td-name{font-weight:600;color:var(--g800)}
+.td-link{cursor:pointer;color:var(--b3);font-weight:600}.td-link:hover{text-decoration:underline}
+.td-sub{font-size:11px;color:var(--g400);margin-top:3px}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:600;white-space:nowrap}
+.bdg-blue{background:var(--bp);color:var(--b2)}.bdg-green{background:var(--gp);color:var(--g1)}
+.bdg-teal{background:var(--tp);color:var(--t1)}.bdg-amber{background:var(--ap);color:#92590e}
+.bdg-red{background:var(--rp);color:#a02f26}.bdg-gray{background:var(--g100);color:var(--g600)}
+.bdg-purple{background:var(--pp);color:var(--p1)}.bdg-orange{background:var(--op);color:var(--o1)}
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(15,41,66,.5);z-index:200;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px)}
+.modal-ov.open{display:flex}
+.modal{background:#fff;border-radius:12px;width:100%;max-width:660px;max-height:93vh;overflow-y:auto;box-shadow:var(--sh-l)}
+.modal.lg{max-width:860px}
+.modal-hdr{padding:17px 22px 13px;border-bottom:1px solid var(--g100);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1;border-radius:12px 12px 0 0}
+.modal-hdr h2{font-size:15px;font-weight:700;color:var(--g800)}
+.modal-body{padding:19px 22px}
+.modal-ftr{padding:13px 22px;border-top:1px solid var(--g100);display:flex;justify-content:flex-end;gap:9px;background:var(--g50);border-radius:0 0 12px 12px}
+.close-x{background:none;border:none;font-size:22px;color:var(--g400);cursor:pointer;line-height:1}
+.subtabs{display:flex;gap:6px;background:#fff;border:1px solid rgba(15,41,66,.06);border-radius:var(--rad-s);padding:5px;margin-bottom:18px;box-shadow:var(--sh);width:fit-content;flex-wrap:wrap}
+.subtab{padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--g500);border-radius:8px;transition:all .15s;background:none;border:none}
+.subtab:hover{color:var(--b3);background:var(--bp)}
+.subtab.active{color:#fff;background:var(--b3);box-shadow:0 2px 8px rgba(37,99,201,.24)}
+.subtab .cnt{display:inline-block;margin-left:7px;font-size:10.5px;background:var(--g100);color:var(--g500);padding:2px 8px;border-radius:20px}
+.subtab.active .cnt{background:rgba(255,255,255,.25);color:#fff}
+.filter-row{display:flex;gap:9px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.filter-row .form-input,.filter-row .form-select{max-width:220px}
+.empty-state{text-align:center;padding:44px 20px}
+.empty-state .ei{font-size:34px;margin-bottom:10px;opacity:.55}
+.empty-state h3{font-size:14px;font-weight:700;color:var(--g700);margin-bottom:6px}
+.empty-state p{font-size:12.5px;color:var(--g400);margin-bottom:16px}
+.toast{position:fixed;bottom:22px;right:22px;padding:11px 18px;border-radius:var(--rad-s);font-size:12.5px;z-index:999;box-shadow:var(--sh-l);display:none;color:#fff;font-weight:600}
+.toast.show{display:block}.toast.ok{background:var(--g2)}.toast.err{background:var(--r1)}.toast.info{background:var(--b3)}
+.pipe-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pipe-lbl{width:130px;font-size:11.5px;color:var(--g600);flex-shrink:0}
+.pipe-bar-w{flex:1;height:8px;background:var(--g100);border-radius:4px;overflow:hidden}
+.pipe-bar{height:100%;border-radius:4px}
+.pipe-cnt{width:30px;text-align:right;font-size:12px;font-weight:700;color:var(--g700)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:49}
+.sidebar-overlay.open{display:block}
+@media(max-width:860px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .metrics{grid-template-columns:repeat(2,1fr)!important;gap:10px}
+  .form-grid{grid-template-columns:1fr}
+  .topbar{margin:10px;padding:0 14px}
+  .page{padding:12px 10px}
+}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-card">
+    <div style="text-align:center;margin-bottom:26px">
+      <img src="/assets/logo-full.png" alt="QlickLeads" style="width:200px;max-width:70%;height:auto;margin:0 auto 8px;display:block">
+      <p style="font-size:12.5px;color:var(--g400)">Recruitment Process Outsourcing</p>
+    </div>
+    <div class="err-box" id="login-err"></div>
+    <div class="form-row"><label class="form-label">Email<span class="req">*</span></label>
+      <input class="form-input" id="li-email" type="email" placeholder="you@company.com"></div>
+    <div class="form-row"><label class="form-label">Password<span class="req">*</span></label>
+      <input class="form-input" id="li-pass" type="password" placeholder="••••••••"></div>
+    <button class="btn btn-primary btn-block" id="li-btn" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<div id="app-screen" style="display:none">
+  <div class="layout">
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-logo">
+        <div class="box"><img src="/assets/logo-full.png" alt="QlickLeads"></div>
+        <div class="sub">Recruitment Platform</div>
+      </div>
+      <nav class="sb-nav">
+        <div class="sb-lbl">Workspace</div>
+        <button class="nav-item" id="nav-analytics" onclick="goto('analytics')"><span class="nav-dot"></span>Analytics</button>
+        <button class="nav-item" id="nav-clients" onclick="goto('clients')"><span class="nav-dot"></span>Clients</button>
+        <button class="nav-item" id="nav-jobs" onclick="goto('jobs')"><span class="nav-dot"></span>Job Management</button>
+        <button class="nav-item" id="nav-cands" onclick="goto('cands')"><span class="nav-dot"></span>Candidates</button>
+        <button class="nav-item" id="nav-interview" onclick="goto('interview')"><span class="nav-dot"></span>Interviews</button>
+        <button class="nav-item" id="nav-offer" onclick="goto('offer')"><span class="nav-dot"></span>Offers</button>
+        <button class="nav-item" id="nav-db" onclick="goto('db')"><span class="nav-dot"></span>Database</button>
+        <div class="sb-lbl" id="admin-lbl" style="display:none">Admin</div>
+        <button class="nav-item" id="nav-admin" style="display:none" onclick="goto('admin')"><span class="nav-dot"></span>Admin Panel</button>
+      </nav>
+      <div class="sb-user">
+        <div class="un" id="sb-name">—</div>
+        <div class="ue" id="sb-email">—</div>
+        <button class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,.75);margin-top:8px;padding-left:0" onclick="doLogout()">Sign out</button>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-l">
+          <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+          <h1 id="page-title">Analytics</h1>
+        </div>
+        <div class="topbar-r" id="topbar-actions"></div>
+      </div>
+      <div class="page" id="page-content"><div style="text-align:center;padding:40px;color:var(--g400)">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-ov" id="modal-ov" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal">
+    <div class="modal-hdr"><h2 id="modal-title">Title</h2><button class="close-x" onclick="closeModal()">&times;</button></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-ftr" id="modal-ftr"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+// ══ STATE & HELPERS ══
+const S={ view:'analytics', user:null, cache:{}, jobId:null, clientId:null };
+const STATUSES=['CV Not Submitted','CV Submitted','HR Rejected','Shortlisted'];
+const ST_CLR={'CV Not Submitted':'bdg-gray','CV Submitted':'bdg-blue','HR Rejected':'bdg-red','Shortlisted':'bdg-green'};
+const INT_STATUS=['Shortlisted','Interview','Rejected','Offered'];
+const IS_CLR={'Shortlisted':'bdg-green','Interview':'bdg-teal','Rejected':'bdg-red','Offered':'bdg-purple'};
+const INT_STAGE=['HR Round 1','HR Round 2','HR Round 3','HM Round 1','HM Round 2','HM Round 3'];
+const OFFER_STAGES=['Selected','Offer Released','Offer Accepted','Resigned','Joined','30 Days Done'];
+
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const today=()=>new Date().toISOString().split('T')[0];
+const fmtDate=d=>d?String(d).split('T')[0]:'—';
+function badge(v,map){ return v?`<span class="badge ${map[v]||'bdg-gray'}">${esc(v)}</span>`:'<span style="color:var(--g400)">—</span>'; }
+function toast(msg,type='ok'){ const t=document.getElementById('toast'); t.textContent=msg; t.className=`toast show ${type}`; clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2600); }
+function openModal(title,body,footer,lg){ document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').innerHTML=body; document.getElementById('modal-ftr').innerHTML=footer||'';
+  document.getElementById('modal').className='modal'+(lg?' lg':''); document.getElementById('modal-ov').classList.add('open'); }
+function closeModal(){ document.getElementById('modal-ov').classList.remove('open'); }
+async function api(method,path,body){
+  const o={method,credentials:'include',headers:{'Content-Type':'application/json'}};
+  if(body) o.body=JSON.stringify(body);
+  const r=await fetch('/api'+path,o);
+  if(r.status===401){ showLogin(); throw new Error('Session expired — please sign in again'); }
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error||`Request failed (${r.status})`);
+  return d;
+}
+// 15s request cache so panels sharing data don't refetch
+async function cget(path,ttl=15000){ const h=S.cache[path];
+  if(h&&Date.now()-h.t<ttl) return h.v;
+  const v=await api('GET',path); S.cache[path]={t:Date.now(),v}; return v; }
+function bust(){ S.cache={}; }
+
+// ── Pagination (10/20/50) ──
+function paginate(items,key,size){
+  const sz=S[`pg_${key}_sz`]||size||10;
+  const total=Math.max(1,Math.ceil(items.length/sz));
+  let page=Math.min(S[`pg_${key}`]||1,total); S[`pg_${key}`]=page;
+  const st=(page-1)*sz;
+  return {slice:items.slice(st,st+sz),page,total,sz,from:items.length?st+1:0,to:Math.min(st+sz,items.length),count:items.length};
+}
+function pager(p,key,fn){
+  if(!p.count) return '';
+  let nums=[]; if(p.total<=7){for(let i=1;i<=p.total;i++)nums.push(i);}
+  else if(p.page<=4)nums=[1,2,3,4,5,'…',p.total];
+  else if(p.page>=p.total-3)nums=[1,'…',p.total-4,p.total-3,p.total-2,p.total-1,p.total];
+  else nums=[1,'…',p.page-1,p.page,p.page+1,'…',p.total];
+  return `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px">
+    <span style="font-size:12.5px;color:var(--g500)">Showing ${p.from}–${p.to} of ${p.count}</span>
+    <select class="form-select" style="max-width:105px;padding:5px 8px;font-size:12px" onchange="S.pg_${key}_sz=+this.value;S.pg_${key}=1;${fn}">
+      ${[10,20,50].map(n=>`<option value="${n}" ${p.sz===n?'selected':''}>${n} / page</option>`).join('')}</select>
+    <div style="display:flex;gap:5px;margin-left:auto">
+      <button class="btn btn-outline btn-xs" ${p.page<=1?'disabled':''} onclick="S.pg_${key}=${p.page-1};${fn}">‹</button>
+      ${nums.map(n=>n==='…'?'<span style="padding:0 5px;color:var(--g400)">…</span>'
+        :`<button class="btn btn-xs ${n===p.page?'btn-primary':'btn-outline'}" onclick="S.pg_${key}=${n};${fn}">${n}</button>`).join('')}
+      <button class="btn btn-outline btn-xs" ${p.page>=p.total?'disabled':''} onclick="S.pg_${key}=${p.page+1};${fn}">›</button>
+    </div></div>`;
+}
+// ── Card / list toggle ──
+function viewToggle(key,fn){ const m=S[`v_${key}`]||'list';
+  return `<div style="display:inline-flex;background:var(--g100);border-radius:8px;padding:3px;gap:2px">
+    <button class="btn btn-xs" style="border:none;background:${m==='list'?'#fff':'transparent'}" onclick="S.v_${key}='list';${fn}">☰ List</button>
+    <button class="btn btn-xs" style="border:none;background:${m==='cards'?'#fff':'transparent'}" onclick="S.v_${key}='cards';${fn}">▦ Cards</button>
+  </div>`; }
+function metricCard(label,val,o={}){ return `<div class="metric ${o.color||'blue'}">
+  <div style="flex:1;min-width:0"><div class="m-lbl">${label}</div><div class="m-val">${val}</div>
+  ${o.sub?`<div class="m-sub">${o.sub}</div>`:''}</div><div class="m-ico">${o.icon||'📊'}</div></div>`; }
+// Who last touched this record
+function editedBy(r){ return r.last_edited_by
+  ? `<div class="td-sub">Edited by ${esc(r.last_edited_by)} · ${fmtDate(r.last_edited_at)}</div>`
+  : (r.created_by_name?`<div class="td-sub">Added by ${esc(r.created_by_name)} · ${fmtDate(r.created_at)}</div>`:''); }
+
+// ══ AUTH ══
+async function doLogin(){
+  const email=document.getElementById('li-email').value.trim();
+  const pass=document.getElementById('li-pass').value;
+  const err=document.getElementById('login-err'); const btn=document.getElementById('li-btn');
+  if(!email||!pass){ err.textContent='Enter your email and password'; err.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Signing in…';
+  try{ const d=await api('POST','/auth/login',{email,password:pass}); S.user=d.user; startApp(); }
+  catch(e){ err.textContent=e.message; err.style.display='block'; }
+  btn.disabled=false; btn.textContent='Sign In';
+}
+async function doLogout(){ try{ await api('POST','/auth/logout'); }catch(e){} S.user=null; showLogin(); }
+function showLogin(){ document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app-screen').style.display='none'; }
+function startApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-screen').style.display='block';
+  document.getElementById('sb-name').textContent=S.user.fullName;
+  document.getElementById('sb-email').textContent=S.user.email;
+  const isAdmin=S.user.role==='admin';
+  document.getElementById('nav-admin').style.display=isAdmin?'flex':'none';
+  document.getElementById('admin-lbl').style.display=isAdmin?'block':'none';
+  goto('analytics');
+}
+function toggleSidebar(){
+  if(window.innerWidth<=860){ document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('open'); }
+  else document.body.classList.toggle('sb-collapsed');
+}
+// ══ ROUTER ══
+function goto(view,opts={}){
+  S.view=view;
+  if(opts.jobId!==undefined)S.jobId=opts.jobId;
+  if(opts.clientId!==undefined)S.clientId=opts.clientId;
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  const map={analytics:'nav-analytics',clients:'nav-clients',jobs:'nav-jobs',cands:'nav-cands',
+    interview:'nav-interview',offer:'nav-offer',db:'nav-db',admin:'nav-admin'};
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el=document.getElementById(map[view]); if(el)el.classList.add('active');
+  document.getElementById('topbar-actions').innerHTML='';
+  ({analytics:renderAnalytics,clients:renderClients,jobs:renderJobs,cands:renderCands,
+    interview:renderInterview,offer:renderOffer,db:renderDb,admin:renderAdmin}[view]||renderAnalytics)();
+}
+
+// ══ TAB 0 — ANALYTICS ══
+async function renderAnalytics(){
+  document.getElementById('page-title').textContent='Analytics';
+  const el=document.getElementById('page-content');
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400)">Loading…</div>';
+  try{
+    const q=S.anJob?`?job_id=${S.anJob}`:S.anClient?`?client_id=${S.anClient}`:'';
+    const d=await api('GET','/analytics'+q);
+    const f=d.filters; const st=d.stats;
+    const jobOpts=f.jobs.filter(j=>!S.anClient||j.client_id==S.anClient)
+      .map(j=>`<option value="${j.id}" ${S.anJob==j.id?'selected':''}>${esc(j.title)}</option>`).join('');
+    const clOpts=f.clients.map(c=>`<option value="${c.id}" ${S.anClient==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+    const maxD=Math.max(1,...d.daily.map(x=>x.n));
+    const pipe=[['CV Not Submitted',st.cv_not_submitted,'#94a0b3'],['CV Submitted',st.cv_submitted,'#2563c9'],
+      ['HR Rejected',st.hr_rejected,'#e8615a'],['Shortlisted',st.shortlisted,'#22a06b'],
+      ['In Interview',st.in_interview,'#0e9aae'],['Offered',st.offered,'#7c5cc4']];
+    const maxP=Math.max(1,...pipe.map(p=>p[1]));
+    el.innerHTML=`
+      <div class="filter-row">
+        <select class="form-select" onchange="S.anClient=this.value||null;S.anJob=null;renderAnalytics()">
+          <option value="">All Clients</option>${clOpts}</select>
+        <select class="form-select" onchange="S.anJob=this.value||null;renderAnalytics()">
+          <option value="">All Jobs</option>${jobOpts}</select>
+        ${(S.anJob||S.anClient)?`<button class="btn btn-ghost btn-sm" onclick="S.anJob=null;S.anClient=null;renderAnalytics()">Clear</button>`:''}
+        <span style="margin-left:auto;font-size:12.5px;color:var(--g500)">Viewing: <strong>${esc(d.label)}</strong></span>
+      </div>
+      <div class="metrics">
+        ${metricCard('Clients',st.clients,{color:'blue',icon:'🏢'})}
+        ${metricCard('Jobs',st.jobs,{color:'teal',icon:'💼'})}
+        ${metricCard('Candidates',st.candidates,{color:'purple',icon:'👥'})}
+        ${metricCard('Offered',st.offered,{color:'green',icon:'✓',sub:`${st.shortlisted} shortlisted`})}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div class="card"><div class="card-hdr"><h3>Pipeline</h3></div><div class="card-body">
+          ${pipe.map(([l,n,c])=>`<div class="pipe-row"><div class="pipe-lbl">${l}</div>
+            <div class="pipe-bar-w"><div class="pipe-bar" style="width:${Math.round(n/maxP*100)}%;background:${c}"></div></div>
+            <div class="pipe-cnt">${n}</div></div>`).join('')}
+        </div></div>
+        <div class="card"><div class="card-hdr"><h3>CVs added — last 30 days</h3></div><div class="card-body">
+          <div style="display:flex;gap:2px;align-items:flex-end;height:95px">
+            ${d.daily.map(x=>`<div title="${x.d}: ${x.n}" style="flex:1;background:${x.n?'#2563c9':'var(--g200)'};height:${x.n?Math.max(6,Math.round(x.n/maxD*100)):3}%;border-radius:2px 2px 0 0"></div>`).join('')}
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--g400);margin-top:6px">
+            <span>${d.daily[0].d}</span><span>${d.daily[d.daily.length-1].d}</span></div>
+        </div></div>
+      </div>
+      <div class="card"><div class="card-hdr"><h3>By Recruiter</h3></div>
+        <div class="tbl-wrap" style="border:none;box-shadow:none"><table>
+          <thead><tr><th>Recruiter</th><th>Total CVs</th><th>Submitted</th><th>Shortlisted</th><th>Offered</th></tr></thead>
+          <tbody>${d.recruiters.length?d.recruiters.map(r=>`<tr><td class="td-name">${esc(r.name)}</td>
+            <td>${r.total}</td><td>${r.submitted}</td><td>${r.shortlisted}</td><td>${r.offered}</td></tr>`).join('')
+            :'<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--g400)">No data yet</td></tr>'}</tbody>
+        </table></div></div>`;
+  }catch(e){ el.innerHTML=`<div class="empty-state"><p style="color:var(--r1)">${esc(e.message)}</p></div>`; }
+}
+
+// ══ TAB 1 — CLIENTS ══
+async function renderClients(){
+  document.getElementById('page-title').textContent='Clients';
+  document.getElementById('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="openClientForm()">+ Add Client</button>`;
+  const el=document.getElementById('page-content');
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400)">Loading…</div>';
+  try{
+    const list=await cget('/clients'); S.clients=list;
+    const q=(S.cq||'').toLowerCase();
+    const f=q?list.filter(c=>(c.name||'').toLowerCase().includes(q)):list;
+    const p=paginate(f,'cl',10);
+    const head=`<div class="filter-row">
+        <input class="form-input" id="cl-q" placeholder="Search clients…" value="${esc(S.cq||'')}">
+        <span style="margin-left:auto;font-size:12.5px;color:var(--g400)">${f.length} clients</span>
+        ${viewToggle('cl','renderClients()')}</div>`;
+    const body=(S.v_cl||'list')==='cards'
+      ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px">
+          ${p.slice.map(c=>`<div class="card" style="padding:16px">
+            <div class="td-link" style="font-size:14px;font-weight:700" onclick="goto('jobs',{clientId:${c.id}})">${esc(c.name)}</div>
+            ${c.linkedin?`<a href="${esc(c.linkedin)}" target="_blank" style="font-size:11.5px;color:var(--b3)">LinkedIn ↗</a>`:'<div style="font-size:11.5px;color:var(--g400)">No LinkedIn</div>'}
+            ${editedBy(c)}
+            <div style="display:flex;gap:5px;margin-top:11px">
+              <button class="btn btn-outline btn-xs" style="flex:1" onclick="goto('jobs',{clientId:${c.id}})">Jobs</button>
+              <button class="btn btn-ghost btn-xs" onclick="openClientForm(${c.id})">Edit</button></div>
+          </div>`).join('')}</div>`
+      : `<div class="tbl-wrap"><table>
+          <thead><tr><th>Client</th><th>LinkedIn</th><th>Added / Last edit</th><th>Actions</th></tr></thead>
+          <tbody>${p.slice.map(c=>`<tr>
+            <td><div class="td-link" onclick="goto('jobs',{clientId:${c.id}})">${esc(c.name)}</div></td>
+            <td>${c.linkedin?`<a href="${esc(c.linkedin)}" target="_blank" style="color:var(--b3);font-size:12.5px">Open ↗</a>`:'—'}</td>
+            <td style="font-size:12px;color:var(--g500)">${c.last_edited_by?`${esc(c.last_edited_by)} · ${fmtDate(c.last_edited_at)}`:`${esc(c.created_by_name||'—')} · ${fmtDate(c.created_at)}`}</td>
+            <td><div style="display:flex;gap:5px">
+              <button class="btn btn-outline btn-xs" onclick="goto('jobs',{clientId:${c.id}})">Jobs</button>
+              <button class="btn btn-ghost btn-xs" onclick="openClientForm(${c.id})">Edit</button>
+              <button class="btn btn-ghost btn-xs" onclick="showActivity('client',${c.id},'${esc(c.name)}')">Log</button>
+            </div></td></tr>`).join('')||'<tr><td colspan="4"><div class="empty-state"><div class="ei">🏢</div><h3>No clients yet</h3></div></td></tr>'}
+          </tbody></table></div>`;
+    el.innerHTML=head+body+pager(p,'cl','renderClients()');
+    const qi=document.getElementById('cl-q');
+    if(qi){ let t; qi.addEventListener('input',()=>{ clearTimeout(t); t=setTimeout(()=>{ S.cq=qi.value; S.pg_cl=1; renderClients();
+      const n=document.getElementById('cl-q'); if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length);} },200); }); }
+  }catch(e){ el.innerHTML=`<div class="empty-state"><p style="color:var(--r1)">${esc(e.message)}</p></div>`; }
+}
+function openClientForm(id){
+  const c=(S.clients||[]).find(x=>x.id===id)||{};
+  openModal(id?'Edit Client':'Add Client',`
+    <div class="form-row"><label class="form-label">Client / Company Name<span class="req">*</span></label>
+      <input class="form-input" id="c-name" value="${esc(c.name||'')}" placeholder="Company name"></div>
+    <div class="form-row"><label class="form-label">Company LinkedIn</label>
+      <input class="form-input" id="c-li" value="${esc(c.linkedin||'')}" placeholder="https://linkedin.com/company/..."></div>`,
+    `<button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveClient(${id||0})">${id?'Save Changes':'Add Client'}</button>`);
+}
+async function saveClient(id){
+  const name=document.getElementById('c-name').value.trim();
+  if(!name){ toast('Client name is required','err'); return; }
+  const data={ name, linkedin:document.getElementById('c-li').value.trim() };
+  try{ id?await api('PUT',`/clients/${id}`,data):await api('POST','/clients',data);
+    bust(); closeModal(); toast(id?'Client updated':'Client added'); renderClients(); }
+  catch(e){ toast(e.message,'err'); }
+}
+async function showActivity(type,id,name){
+  try{ const logs=await api('GET',`/analytics/activity?entity_type=${type}&entity_id=${id}&limit=50`);
+    openModal(`Activity — ${name}`, logs.length?logs.map(l=>`
+      <div style="border-left:3px solid var(--b3);background:#f7f9fc;border-radius:8px;padding:9px 12px;margin-bottom:7px">
+        <div style="font-size:12.5px;font-weight:600;color:var(--g800)">${esc(l.action)}</div>
+        ${l.detail?`<div style="font-size:11.5px;color:var(--g600);margin-top:2px">${esc(l.detail)}</div>`:''}
+        <div style="font-size:11px;color:var(--g400);margin-top:3px">${esc(l.actor)} · ${new Date(l.at).toLocaleString('en-IN')}</div>
+      </div>`).join(''):'<div style="text-align:center;padding:22px;color:var(--g400)">No activity recorded</div>',
+      `<button class="btn btn-outline" onclick="closeModal()">Close</button>`);
+  }catch(e){ toast(e.message,'err'); }
+}
+
+// ══ TAB 2 — JOB MANAGEMENT ══
+async function renderJobs(){
+  document.getElementById('page-title').textContent='Job Management';
+  document.getElementById('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="openJobForm()">+ Add Job</button>`;
+  const el=document.getElementById('page-content');
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400)">Loading…</div>';
+  try{
+    const [jobs,clients]=await Promise.all([cget('/jobs'),cget('/clients')]);
+    S.jobs=jobs; S.clients=clients;
+    let f=jobs;
+    if(S.clientId) f=f.filter(j=>j.client_id===Number(S.clientId));
+    const q=(S.jq||'').toLowerCase();
+    if(q) f=f.filter(j=>(j.title||'').toLowerCase().includes(q)||(j.client_name||'').toLowerCase().includes(q));
+    const p=paginate(f,'jb',10);
+    const clOpts=clients.map(c=>`<option value="${c.id}" ${S.clientId==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+    const head=`<div class="filter-row">
+      <input class="form-input" id="jb-q" placeholder="Search jobs…" value="${esc(S.jq||'')}">
+      <select class="form-select" onchange="S.clientId=this.value||null;S.pg_jb=1;renderJobs()">
+        <option value="">All Clients</option>${clOpts}</select>
+      ${S.clientId?`<button class="btn btn-ghost btn-sm" onclick="S.clientId=null;renderJobs()">Clear</button>`:''}
+      <span style="margin-left:auto;font-size:12.5px;color:var(--g400)">${f.length} jobs</span>
+      ${viewToggle('jb','renderJobs()')}</div>`;
+    const body=(S.v_jb||'list')==='cards'
+      ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px">
+          ${p.slice.map(j=>`<div class="card" style="padding:16px">
+            <div class="td-link" style="font-size:14px;font-weight:700" onclick="goto('cands',{jobId:${j.id}})">${esc(j.title)}</div>
+            <div style="font-size:11.5px;color:var(--g500);margin-top:2px">${esc(j.client_name)}${j.location?` · ${esc(j.location)}`:''}</div>
+            <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap">
+              <span class="badge bdg-blue">${j.total_candidates} CVs</span>
+              <span class="badge bdg-green">${j.shortlisted} shortlisted</span></div>
+            ${j.budget?`<div style="font-size:12px;color:var(--g600);margin-top:8px">Budget: ${esc(j.budget)}</div>`:''}
+            ${editedBy(j)}
+            <div style="display:flex;gap:5px;margin-top:11px">
+              <button class="btn btn-outline btn-xs" style="flex:1" onclick="goto('cands',{jobId:${j.id}})">Candidates</button>
+              <button class="btn btn-ghost btn-xs" onclick="openJobForm(${j.id})">Edit</button></div>
+          </div>`).join('')}</div>`
+      : `<div class="tbl-wrap"><table style="min-width:1000px">
+          <thead><tr><th>Job Title</th><th>Client</th><th>Location</th><th>Budget</th><th>CVs</th><th>Submitted</th><th>Shortlisted</th><th>Offered</th><th>Docs</th><th>Added / Last edit</th><th>Actions</th></tr></thead>
+          <tbody>${p.slice.map(j=>`<tr>
+            <td><div class="td-link" onclick="goto('cands',{jobId:${j.id}})">${esc(j.title)}</div>
+              ${(j.prescreen_form||[]).length?`<div class="td-sub">📋 ${(j.prescreen_form||[]).length} screening Qs</div>`:''}</td>
+            <td style="font-size:12.5px">${esc(j.client_name)}</td>
+            <td style="font-size:12.5px">${esc(j.location||'—')}</td>
+            <td style="font-size:12.5px">${esc(j.budget||'—')}</td>
+            <td style="text-align:center"><strong>${j.total_candidates}</strong></td>
+            <td style="text-align:center">${j.cv_submitted}</td>
+            <td style="text-align:center">${j.shortlisted}</td>
+            <td style="text-align:center">${j.offered}</td>
+            <td style="font-size:11.5px">${j.jd_file?`<a href="/api/jobs/${j.id}/jd/download" target="_blank" style="color:var(--b3)">JD</a>`:''}
+              ${j.prescreen_file?` <a href="/api/jobs/${j.id}/prescreen/download" target="_blank" style="color:var(--b3)">PS</a>`:''}
+              ${(!j.jd_file&&!j.prescreen_file)?'—':''}</td>
+            <td style="font-size:12px;color:var(--g500)">${j.last_edited_by?`${esc(j.last_edited_by)} · ${fmtDate(j.last_edited_at)}`:`${esc(j.created_by_name||'—')} · ${fmtDate(j.created_at)}`}</td>
+            <td><div style="display:flex;gap:4px;flex-wrap:wrap">
+              <button class="btn btn-outline btn-xs" onclick="goto('cands',{jobId:${j.id}})">CVs</button>
+              <button class="btn btn-ghost btn-xs" onclick="openJobForm(${j.id})">Edit</button>
+              <button class="btn btn-ghost btn-xs" onclick="openFormBuilder(${j.id})">Form</button>
+              <button class="btn btn-ghost btn-xs" onclick="showActivity('job',${j.id},'${esc(j.title)}')">Log</button>
+            </div></td></tr>`).join('')||'<tr><td colspan="11"><div class="empty-state"><div class="ei">💼</div><h3>No jobs yet</h3></div></td></tr>'}
+          </tbody></table></div>`;
+    el.innerHTML=head+body+pager(p,'jb','renderJobs()');
+    const qi=document.getElementById('jb-q');
+    if(qi){ let t; qi.addEventListener('input',()=>{ clearTimeout(t); t=setTimeout(()=>{ S.jq=qi.value; S.pg_jb=1; renderJobs();
+      const n=document.getElementById('jb-q'); if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length);} },200); }); }
+  }catch(e){ el.innerHTML=`<div class="empty-state"><p style="color:var(--r1)">${esc(e.message)}</p></div>`; }
+}
+async function openJobForm(id){
+  const clients=S.clients||await cget('/clients');
+  let j={};
+  if(id){ try{ j=await api('GET',`/jobs/${id}`); }catch(e){} }
+  openModal(id?'Edit Job':'Add Job',`
+    <div class="fs"><div class="fs-title">Job Details</div>
+      <div class="form-row"><label class="form-label">Client<span class="req">*</span></label>
+        <select class="form-select" id="j-client"><option value="">-- Select Client --</option>
+          ${clients.map(c=>`<option value="${c.id}" ${j.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>
+      <div class="form-row"><label class="form-label">Job Title<span class="req">*</span></label>
+        <input class="form-input" id="j-title" value="${esc(j.title||'')}" placeholder="e.g. Senior Java Developer"></div>
+      <div class="form-grid">
+        <div class="form-row"><label class="form-label">Budget</label>
+          <input class="form-input" id="j-budget" value="${esc(j.budget||'')}" placeholder="e.g. 15–20 LPA"></div>
+        <div class="form-row"><label class="form-label">Location</label>
+          <input class="form-input" id="j-loc" value="${esc(j.location||'')}" placeholder="e.g. Gurgaon"></div>
+      </div>
+    </div>
+    <div class="fs"><div class="fs-title">Documents</div>
+      <div class="form-row"><label class="form-label">Job Description</label>
+        ${j.jd_file?`<div style="font-size:12px;color:var(--g600);margin-bottom:5px">📄 ${esc(j.jd_file.name)} · <a href="/api/jobs/${id}/jd/download" target="_blank" style="color:var(--b3)">download</a></div>`:''}
+        <input type="file" id="j-jd" accept=".pdf,.doc,.docx" class="form-input" style="padding:6px">
+        <div class="form-hint">PDF or Word</div></div>
+      <div class="form-row"><label class="form-label">Pre-screening Questions (document)</label>
+        ${j.prescreen_file?`<div style="font-size:12px;color:var(--g600);margin-bottom:5px">📝 ${esc(j.prescreen_file.name)} · <a href="/api/jobs/${id}/prescreen/download" target="_blank" style="color:var(--b3)">download</a></div>`:''}
+        <input type="file" id="j-ps" accept=".pdf,.doc,.docx" class="form-input" style="padding:6px"></div>
+    </div>
+    ${id?'<div class="form-hint">Use the <strong>Form</strong> button on the jobs table to build the screening questions recruiters fill in when adding a candidate.</div>':''}`,
+    `<button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" id="j-save" onclick="saveJob(${id||0})">${id?'Save Changes':'Add Job'}</button>`, true);
+}
+async function saveJob(id){
+  const client_id=document.getElementById('j-client').value;
+  const title=document.getElementById('j-title').value.trim();
+  if(!client_id){ toast('Client is required','err'); return; }
+  if(!title){ toast('Job title is required','err'); return; }
+  const btn=document.getElementById('j-save'); btn.disabled=true; btn.textContent='Saving…';
+  const data={ client_id:Number(client_id), title,
+    budget:document.getElementById('j-budget').value.trim(),
+    location:document.getElementById('j-loc').value.trim() };
+  try{
+    const saved=id?await api('PUT',`/jobs/${id}`,data):await api('POST','/jobs',data);
+    const jid=saved.id||id;
+    for(const [inp,ep] of [['j-jd','jd'],['j-ps','prescreen']]){
+      const f=document.getElementById(inp);
+      if(f&&f.files.length){ const fd=new FormData(); fd.append('file',f.files[0]);
+        const r=await fetch(`/api/jobs/${jid}/${ep}`,{method:'POST',credentials:'include',body:fd});
+        if(!r.ok){ const er=await r.json().catch(()=>({})); throw new Error(er.error||'Upload failed'); } }
+    }
+    bust(); closeModal(); toast(id?'Job updated':'Job added'); renderJobs();
+  }catch(e){ toast(e.message,'err'); btn.disabled=false; btn.textContent=id?'Save Changes':'Add Job'; }
+}
+
+// ── Pre-screening form builder ──
+async function openFormBuilder(jobId){
+  try{
+    const qs=await api('GET',`/jobs/${jobId}/form`);
+    S.fb=qs.map(q=>({...q}));
+    S.fbJob=jobId; renderFormBuilder();
+  }catch(e){ toast(e.message,'err'); }
+}
+function renderFormBuilder(){
+  const rows=S.fb.map((q,i)=>`
+    <div class="fs" style="margin-bottom:10px">
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <div style="flex:1">
+          <div class="form-grid">
+            <div class="form-row"><label class="form-label">Question ${i+1}</label>
+              <input class="form-input" value="${esc(q.label||'')}" oninput="S.fb[${i}].label=this.value"></div>
+            <div class="form-row"><label class="form-label">Type</label>
+              <select class="form-select" onchange="S.fb[${i}].type=this.value;renderFormBuilder()">
+                <option value="text" ${q.type==='text'?'selected':''}>Text Input</option>
+                <option value="single" ${q.type==='single'?'selected':''}>Single Select MCQ</option>
+                <option value="multi" ${q.type==='multi'?'selected':''}>Multi Select MCQ</option>
+              </select></div>
+          </div>
+          ${q.type!=='text'?`<div class="form-row"><label class="form-label">Options (comma separated)</label>
+            <input class="form-input" value="${esc((q.options||[]).join(', '))}" oninput="S.fb[${i}].options=this.value.split(',').map(s=>s.trim()).filter(Boolean)"></div>`:''}
+          <label style="font-size:12px;display:flex;align-items:center;gap:7px;cursor:pointer">
+            <input type="checkbox" ${q.required?'checked':''} onchange="S.fb[${i}].required=this.checked" style="width:auto"> Required</label>
+        </div>
+        <button class="btn btn-danger btn-xs" onclick="S.fb.splice(${i},1);renderFormBuilder()">×</button>
+      </div>
+    </div>`).join('')||'<div style="text-align:center;padding:20px;color:var(--g400);font-size:12.5px">No questions yet — add the first one below.</div>';
+  openModal('Pre-screening Form',`
+    <p style="font-size:12.5px;color:var(--g600);margin-bottom:12px">Recruiters answer these while adding a candidate to this job.</p>
+    <div id="fb-rows">${rows}</div>
+    <button class="btn btn-outline btn-sm" onclick="S.fb.push({type:'text',label:'',options:[],required:false});renderFormBuilder()">+ Add Question</button>`,
+    `<button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveFormBuilder()">Save Form</button>`, true);
+}
+async function saveFormBuilder(){
+  const qs=S.fb.filter(q=>(q.label||'').trim());
+  try{ await api('PUT',`/jobs/${S.fbJob}/form`,{questions:qs});
+    bust(); closeModal(); toast('Screening form saved'); renderJobs(); }
+  catch(e){ toast(e.message,'err'); }
+}
+
+// ══ TAB 3 — CANDIDATES ══
+async function renderCands(){
+  document.getElementById('page-title').textContent='Candidate Management';
+  const el=document.getElementById('page-content');
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400)">Loading…</div>';
+  try{
+    const [cands,jobs]=await Promise.all([cget('/candidates'),cget('/jobs')]);
+    S.cands=cands; S.jobs=jobs;
+    document.getElementById('topbar-actions').innerHTML=`
+      <button class="btn btn-outline btn-sm" onclick="exportCands()">Export</button>
+      <button class="btn btn-primary" onclick="openCandJobPicker()">+ Add Candidate</button>`;
+    let f=cands;
+    if(S.jobId) f=f.filter(c=>c.job_id===Number(S.jobId));
+    if(S.cdStatus) f=f.filter(c=>c.status===S.cdStatus);
+    if(S.cdRec) f=f.filter(c=>(c.recruiter_name||'Unassigned')===S.cdRec);
+    const cdRecs=[...new Set(cands.map(c=>c.recruiter_name||'Unassigned'))].sort();
+    const q=(S.cdq||'').toLowerCase();
+    if(q){ const t=q.split(/\s+/); f=f.filter(c=>{ const h=[c.name,c.job_title,c.client_name,c.last_org,c.last_designation,c.current_location,c.recruiter_name].filter(Boolean).join(' ').toLowerCase(); return t.every(x=>h.includes(x)); }); }
+    const p=paginate(f,'cd',10);
+    const jobOpts=jobs.map(j=>`<option value="${j.id}" ${S.jobId==j.id?'selected':''}>${esc(j.title)} — ${esc(j.client_name)}</option>`).join('');
+    const head=`<div class="filter-row">
+      <input class="form-input" id="cd-q" placeholder="Search candidates…" value="${esc(S.cdq||'')}">
+      <select class="form-select" onchange="S.jobId=this.value||null;S.pg_cd=1;renderCands()"><option value="">All Jobs</option>${jobOpts}</select>
+      <select class="form-select" onchange="S.cdRec=this.value||null;S.pg_cd=1;renderCands()"><option value="">All Recruiters</option>
+        ${cdRecs.map(r=>`<option ${S.cdRec===r?'selected':''}>${esc(r)}</option>`).join('')}</select>
+      <select class="form-select" onchange="S.cdStatus=this.value||null;S.pg_cd=1;renderCands()"><option value="">All Statuses</option>
+        ${STATUSES.map(s=>`<option ${S.cdStatus===s?'selected':''}>${s}</option>`).join('')}</select>
+      ${(S.jobId||S.cdStatus||S.cdq||S.cdRec)?`<button class="btn btn-ghost btn-sm" onclick="S.jobId=null;S.cdStatus=null;S.cdq='';S.cdRec=null;renderCands()">Clear</button>`:''}
+      <span style="margin-left:auto;font-size:12.5px;color:var(--g400)">${f.length} candidates</span>
+      ${viewToggle('cd','renderCands()')}</div>`;
+    const body=(S.v_cd||'list')==='cards'
+      ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:14px">
+          ${p.slice.map(c=>`<div class="card" style="padding:16px">
+            <div class="td-link" style="font-size:14px;font-weight:700" onclick="openCandForm(${c.id})">${esc(c.name)}</div>
+            <div style="font-size:11.5px;color:var(--g500);margin-top:2px">${esc(c.job_title)} · ${esc(c.client_name)}</div>
+            <div style="margin-top:9px">${badge(c.status,ST_CLR)}</div>
+            <div style="font-size:12px;color:var(--g600);margin-top:9px">
+              ${esc(c.last_designation||'—')}${c.last_org?` @ ${esc(c.last_org)}`:''}<br>
+              CTC ${esc(c.current_ctc||'—')} → <strong>${esc(c.expected_ctc||'—')}</strong></div>
+            ${c.brief?`<div style="font-size:11.5px;color:var(--g500);margin-top:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(c.brief)}</div>`:''}
+            ${editedBy(c)}
+            <div style="display:flex;gap:5px;margin-top:11px">
+              <button class="btn btn-outline btn-xs" style="flex:1" onclick="openCandForm(${c.id})">Open</button>
+              ${c.cv?`<a class="btn btn-ghost btn-xs" href="/api/candidates/${c.id}/cv/download" target="_blank">CV</a>`:''}</div>
+          </div>`).join('')}</div>`
+      : `<div class="tbl-wrap"><table style="min-width:1200px">
+          <thead><tr><th style="width:32px"><input type="checkbox" onchange="document.querySelectorAll('.cd-chk').forEach(x=>x.checked=this.checked)" style="width:auto"></th>
+            <th>Candidate</th><th>Job / Client</th><th>Status</th><th>Recruiter</th><th>Current Location</th><th>Last Org</th><th>Last Designation</th>
+            <th>Current CTC</th><th>Expected CTC</th><th>Applying For</th><th>Brief</th><th>Score</th><th>CV</th><th>Report</th><th>Last edit</th><th>Actions</th></tr></thead>
+          <tbody>${p.slice.map(c=>`<tr>
+            <td><input type="checkbox" class="cd-chk" value="${c.id}" style="width:auto"></td>
+            <td><div class="td-link" onclick="openCandForm(${c.id})">${esc(c.name)}</div></td>
+            <td style="font-size:12px">${esc(c.job_title)}<div class="td-sub">${esc(c.client_name)}</div></td>
+            <td>${badge(c.status,ST_CLR)}</td>
+            <td style="font-size:12px">${esc(c.recruiter_name||'—')}</td>
+            <td style="font-size:12px">${esc(c.current_location||'—')}</td>
+            <td style="font-size:12px">${esc(c.last_org||'—')}</td>
+            <td style="font-size:12px">${esc(c.last_designation||'—')}</td>
+            <td style="font-size:12px">${esc(c.current_ctc||'—')}</td>
+            <td style="font-size:12px;font-weight:600">${esc(c.expected_ctc||'—')}</td>
+            <td style="font-size:12px">${esc(c.applying_location||'—')}</td>
+            <td style="font-size:12px;max-width:180px"><div style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--g600)">${esc(c.brief||'—')}</div></td>
+            <td style="font-size:12px">${c.match_score?`<span class="badge ${+c.match_score>=80?'bdg-green':+c.match_score>=60?'bdg-amber':'bdg-red'}">${esc(c.match_score)}</span>`:'—'}</td>
+            <td>${c.cv?`<a class="btn btn-outline btn-xs" href="/api/candidates/${c.id}/cv/download" target="_blank">CV</a>`:'—'}</td>
+            <td>${c.match_report?`<a class="btn btn-outline btn-xs" href="/api/candidates/${c.id}/report/download" target="_blank">Report</a>`:'—'}</td>
+            <td style="font-size:11.5px;color:var(--g500)">${c.last_edited_by?`${esc(c.last_edited_by)}<div class="td-sub">${fmtDate(c.last_edited_at)}</div>`:`${esc(c.created_by_name||'—')}<div class="td-sub">${fmtDate(c.created_at)}</div>`}</td>
+            <td><div style="display:flex;gap:4px">
+              <button class="btn btn-ghost btn-xs" onclick="openCandForm(${c.id})">Edit</button>
+              <button class="btn btn-ghost btn-xs" onclick="showActivity('candidate',${c.id},'${esc(c.name)}')">Log</button></div></td>
+          </tr>`).join('')||'<tr><td colspan="17"><div class="empty-state"><div class="ei">👥</div><h3>No candidates yet</h3><p>Pick a job and add your first candidate.</p></div></td></tr>'}
+          </tbody></table></div>`;
+    el.innerHTML=head+body+pager(p,'cd','renderCands()');
+    const qi=document.getElementById('cd-q');
+    if(qi){ let t; qi.addEventListener('input',()=>{ clearTimeout(t); t=setTimeout(()=>{ S.cdq=qi.value; S.pg_cd=1; renderCands();
+      const n=document.getElementById('cd-q'); if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length);} },200); }); }
+  }catch(e){ el.innerHTML=`<div class="empty-state"><p style="color:var(--r1)">${esc(e.message)}</p></div>`; }
+}
+function exportCands(){
+  const sel=[...document.querySelectorAll('.cd-chk:checked')].map(x=>x.value);
+  const q=sel.length?`?ids=${sel.join(',')}`:'';
+  window.open('/api/candidates/export/excel'+q,'_blank');
+  toast(sel.length?`Exporting ${sel.length} selected…`:'Exporting all candidates…');
+}
+async function openCandJobPicker(){
+  const jobs=S.jobs||await cget('/jobs');
+  if(!jobs.length){ toast('Add a job first','err'); return; }
+  openModal('Add Candidate — pick a job',`
+    <div class="form-row"><label class="form-label">Job<span class="req">*</span></label>
+      <select class="form-select" id="pick-job">${jobs.map(j=>`<option value="${j.id}">${esc(j.title)} — ${esc(j.client_name)}</option>`).join('')}</select></div>`,
+    `<button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="openCandForm(0,document.getElementById('pick-job').value)">Continue</button>`);
+}
+async function openCandForm(id, jobId){
+  let c={}, jid=jobId;
+  if(id){ try{ c=await api('GET',`/candidates/${id}`); jid=c.job_id; }catch(e){ toast(e.message,'err'); return; } }
+  let form=[];
+  try{ form=await api('GET',`/jobs/${jid}/form`); }catch(e){}
+  const ans=c.prescreen_answers||[];
+  const formHtml=form.length?`<div class="fs"><div class="fs-title">Pre-screening</div>
+    ${form.map((q,i)=>{ const a=(ans.find(x=>x.id===q.id)||{}).value;
+      if(q.type==='text') return `<div class="form-row"><label class="form-label">${esc(q.label)}${q.required?'<span class="req">*</span>':''}</label>
+        <input class="form-input ps-q" data-qid="${q.id}" data-type="text" data-req="${q.required?1:0}" data-label="${esc(q.label)}" value="${esc(a||'')}"></div>`;
+      if(q.type==='single') return `<div class="form-row"><label class="form-label">${esc(q.label)}${q.required?'<span class="req">*</span>':''}</label>
+        <select class="form-select ps-q" data-qid="${q.id}" data-type="single" data-req="${q.required?1:0}" data-label="${esc(q.label)}"><option value="">-- Select --</option>
+        ${(q.options||[]).map(o=>`<option ${a===o?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`;
+      const arr=Array.isArray(a)?a:[];
+      return `<div class="form-row"><label class="form-label">${esc(q.label)}${q.required?'<span class="req">*</span>':''}</label>
+        <div class="ps-q" data-qid="${q.id}" data-type="multi" data-req="${q.required?1:0}" data-label="${esc(q.label)}" style="display:flex;flex-wrap:wrap;gap:10px">
+${(q.options||[]).map(o=>`<label style="font-size:12.5px;display:flex;align-items:center;gap:5px"><input type="checkbox" class="ps-opt" value="${esc(o)}" ${arr.includes(o)?'checked':''} style="width:auto"> ${esc(o)}</label>`).join('')}
+        </div></div>`; }).join('')}</div>`:'';
+  openModal(id?`Edit — ${c.name}`:'Add Candidate',`
+    <div class="fs"><div class="fs-title">Candidate</div>
+      <div class="form-grid">
+        <div class="form-row"><label class="form-label">Recruiter Name</label>
+          <input class="form-input" id="x-rec" value="${esc(c.recruiter_name||S.user.fullName)}"></div>
+        <div class="form-row"><label class="form-label">Candidate Name<span class="req">*</span></label>
+          <input class="form-input" id="x-name" value="${esc(c.name||'')}"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label class="form-label">Current Location</label><input class="form-input" id="x-loc" value="${esc(c.current_location||'')}"></div>
+        <div class="form-row"><label class="form-label">Applying For Which Location</label><input class="form-input" id="x-apply" value="${esc(c.applying_location||'')}"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label class="form-label">Last Organisation</label><input class="form-input" id="x-org" value="${esc(c.last_org||'')}"></div>
+        <div class="form-row"><label class="form-label">Last Designation</label><input class="form-input" id="x-desig" value="${esc(c.last_designation||'')}"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label class="form-label">Current CTC</label><input class="form-input" id="x-cctc" value="${esc(c.current_ctc||'')}"></div>
+        <div class="form-row"><label class="form-label">Expected CTC</label><input class="form-input" id="x-ectc" value="${esc(c.expected_ctc||'')}"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label class="form-label">CV Match Score</label><input type="number" min="0" max="100" class="form-input" id="x-score" value="${esc(c.match_score||'')}"></div>
+        <div class="form-row"><label class="form-label">Status</label>
+          <select class="form-select" id="x-status">${STATUSES.map(s=>`<option ${(c.status||'CV Not Submitted')===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      </div>
+    </div>
+    <div class="fs"><div class="fs-title">Brief</div>
+      <div class="form-row"><label class="form-label">Candidate Brief<span class="req">*</span></label>
+        <textarea class="form-textarea" id="x-brief" style="min-height:90px" placeholder="Short summary — background, strengths, why they fit this role…">${esc(c.brief||'')}</textarea>
+        <div class="form-hint">A short write-up on the candidate. Required.</div></div>
+    </div>
+    <div class="fs"><div class="fs-title">Documents</div>
+      <div class="form-grid">
+        <div class="form-row"><label class="form-label">CV</label>
+          ${c.cv?`<div style="font-size:12px;color:var(--g600);margin-bottom:5px">📄 ${esc(c.cv.name)}</div>`:''}
+          <input type="file" id="x-cv" accept=".pdf,.doc,.docx" class="form-input" style="padding:6px"></div>
+        <div class="form-row"><label class="form-label">CV Match Score Report</label>
+          ${c.match_report?`<div style="font-size:12px;color:var(--g600);margin-bottom:5px">📊 ${esc(c.match_report.name)}</div>`:''}
+          <input type="file" id="x-rep" accept=".pdf,.doc,.docx" class="form-input" style="padding:6px"></div>
+      </div>
+    </div>${formHtml}`,
+    `<button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" id="x-save" onclick="saveCand(${id||0},${jid})">${id?'Save Changes':'Add Candidate'}</button>`, true);
+}
+async function saveCand(id, jobId){
+  const name=document.getElementById('x-name').value.trim();
+  if(!name){ toast('Candidate name is required','err'); return; }
+  const brief=document.getElementById('x-brief').value.trim();
+  if(!brief){ toast('Candidate brief is required','err'); document.getElementById('x-brief').focus(); return; }
+
+  // Collect pre-screening answers and enforce any question marked required
+  const answers=[]; let missing=null;
+  document.querySelectorAll('.ps-q').forEach(el=>{
+    const t=el.dataset.type, qid=el.dataset.qid;
+    const req=el.dataset.req==='1', label=el.dataset.label||'a question';
+    const value = (t==='multi')
+      ? [...el.querySelectorAll('.ps-opt:checked')].map(x=>x.value)
+      : el.value;
+    const empty = Array.isArray(value) ? value.length===0 : !String(value).trim();
+    if(req && empty && !missing) missing=label;
+    answers.push({ id:qid, value });
+  });
+  if(missing){ toast(`Pre-screening: "${missing}" is required`,'err'); return; }
+  const btn=document.getElementById('x-save'); btn.disabled=true; btn.textContent='Saving…';
+  const data={ job_id:Number(jobId), name,
+    recruiter_name:document.getElementById('x-rec').value.trim(),
+    current_location:document.getElementById('x-loc').value.trim(),
+    applying_location:document.getElementById('x-apply').value.trim(),
+    last_org:document.getElementById('x-org').value.trim(),
+    last_designation:document.getElementById('x-desig').value.trim(),
+    current_ctc:document.getElementById('x-cctc').value.trim(),
+    expected_ctc:document.getElementById('x-ectc').value.trim(),
+    match_score:document.getElementById('x-score').value,
+    brief,
+    status:document.getElementById('x-status').value,
+    prescreen_answers:answers };
+  try{
+    const saved=id?await api('PUT',`/candidates/${id}`,data):await api('POST','/candidates',data);
+    const cid=saved.id||id;
+    for(const [inp,ep] of [['x-cv','cv'],['x-rep','report']]){
+      const f=document.getElementById(inp);
+      if(f&&f.files.length){ const fd=new FormData(); fd.append('file',f.files[0]);
+        const r=await fetch(`/api/candidates/${cid}/${ep}`,{method:'POST',credentials:'include',body:fd});
+        if(!r.ok){ const er=await r.json().catch(()=>({})); throw new Error(er.error||'Upload failed'); } }
+    }
+    bust(); closeModal(); toast(id?'Candidate updated':'Candidate added');
+    (S.view==='db'?renderDb:S.view==='interview'?renderInterview:renderCands)();
+  }catch(e){ toast(e.message,'err'); btn.disabled=false; btn.textContent=id?'Save Changes':'Add Candidate'; }
+}
+
+// ══ TAB 4 — INTERVIEW MANAGEMENT ══
+async function renderInterview(){
+  document.getElementById('page-title').textContent='Interview Management';
+  document.getElementById('topbar-actions').innerHTML='';
+  const el=document.getElementById('page-content');
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400)">Loading…</div>';
+  try{
+    const cands=await cget('/candidates');
+    // Everyone shortlisted (or already moving through interview) appears here
+    let f=cands.filter(c=>c.status==='Shortlisted'||c.interview_status);
+    if(S.ivJob) f=f.filter(c=>c.job_id===Number(S.ivJob));
+    if(S.ivStatus) f=f.filter(c=>c.interview_status===S.ivStatus);
+    if(S.ivStage) f=f.filter(c=>c.interview_stage===S.ivStage);
+    if(S.ivRec) f=f.filter(c=>(c.recruiter_name||'Unassigned')===S.ivRec);
+    const ivRecs=[...new Set(cands.filter(c=>c.status==='Shortlisted'||c.interview_status).map(c=>c.recruiter_name||'Unassigned'))].sort();
+    const jobs=[...new Map(f.map(c=>[c.job_id,{id:c.job_id,title:c.job_title,client:c.client_name}])).values()];
+    const p=paginate(f,'iv',10);
+    el.innerHTML=`
+      <div class="filter-row">
+        <select class="form-select" onchange="S.ivJob=this.value||null;S.pg_iv=1;renderInterview()"><option value="">All Jobs</option>
+          ${jobs.map(j=>`<option value="${j.id}" ${S.ivJob==j.id?'selected':''}>${esc(j.title)} — ${esc(j.client)}</option>`).join('')}</select>
+        <select class="form-select" onchange="S.ivStatus=this.value||null;S.pg_iv=1;renderInterview()"><option value="">All Statuses</option>
+          ${INT_STATUS.map(s=>`<option ${S.ivStatus===s?'selected':''}>${s}</option>`).join('')}</select>
+        <select class="form-select" onchange="S.ivStage=this.value||null;S.pg_iv=1;renderInterview()"><option value="">All Stages</option>
+          ${INT_STAGE.map(s=>`<option ${S.ivStage===s?'selected':''}>${s}</option>`).join('')}</select>
+        <select class="form-select" onchange="S.ivRec=this.value||null;S.pg_iv=1;renderInterview()"><option value="">All Recruiters</option>
+          ${ivRecs.map(r=>`<option ${S.ivRec===r?'selected':''}>${esc(r)}</option>`).join('')}</select>
+        ${(S.ivJob||S.ivStatus||S.ivStage||S.ivRec)?`<button class="btn btn-ghost btn-sm" onclick="S.ivJob=null;S.ivStatus=null;S.ivStage=null;S.ivRec=null;renderInterview()">Clear</button>`:''}
+        <span style="margin-left:auto;font-size:12.5px;color:var(--g400)">${f.length} in interview pipeline</span>
+      </div>
+      <div class="tbl-wrap"><table style="min-width:1000px">
+        <thead><tr><th>Candidate</th><th>Job / Client</th><th>Interview Status</th><th>Stage</th><th>Interview Date & Time</th><th>Last edit</th><th>Actions</th></tr></thead>
+        <tbody>${p.slice.map(c=>`<tr>
+          <td><div class="td-name">${esc(c.name)}</div><div class="td-sub">${esc(c.recruiter_name||'')}</div></td>
+          <td style="font-size:12px">${esc(c.job_title)}<div class="td-sub">${esc(c.client_name)}</div></td>
+          <td><select class="form-select" style="min-width:130px;padding:5px 8px;font-size:12px"
+              onchange="patchCand(${c.id},{interview_status:this.value})">
+              <option value="">—</option>${INT_STATUS.map(s=>`<option ${c.interview_status===s?'selected':''}>${s}</option>`).join('')}</select></td>
+          <td><select class="form-select" style="min-width:130px;padding:5px 8px;font-size:12px"
+              onchange="patchCand(${c.id},{interview_stage:this.value})">
+              <option value="">—</option>${INT_STAGE.map(s=>`<option ${c.interview_stage===s?'selected':''}>${s}</option>`).join('')}</select></td>
+          <td><input type="datetime-local" class="form-input" style="min-width:185px;padding:5px 8px;font-size:12px"
+              value="${esc((c.interview_at||'').slice(0,16))}" onchange="patchCand(${c.id},{interview_at:this.value})"></td>
+          <td style="font-size:11.5px;color:var(--g500)">${c.last_edited_by?`${esc(c.last_edited_by)}<div class="td-sub">${fmtDate(c.last_edited_at)}</div>`:'—'}</td>
+          <td><div style="display:flex;gap:4px">
+            <button class="btn btn-ghost btn-xs" onclick="openCandForm(${c.id})">Open</button>
+            <button class="btn btn-ghost btn-xs" onclick="showActivity('candidate',${c.id},'${esc(c.name)}')">Log</button></div></td>
+        </tr>`).join('')||'<tr><td colspan="7"><div class="empty-state"><div class="ei">🗓</div><h3>Nobody in the interview pipeline</h3><p>Mark a candidate as <strong>Shortlisted</strong> to bring them here.</p></div></td></tr>'}
+        </tbody></table></div>${pager(p,'iv','renderInterview()')}`;
+  }catch(e){ el.innerHTML=`<div class="empty-state"><p style="color:var(--r1)">${esc(e.message)}</p></div>`; }
+}
+async function patchCand(id,patch){
+  try{ await api('PUT',`/candidates/${id}`,patch); bust(); toast('Updated');
+    (S.view==='interview'?renderInterview:S.view==='offer'?renderOffer:renderCands)(); }
+  catch(e){ toast(e.message,'err'); }
+}
+
+// ══ TAB 5 — OFFER MANAGEMENT ══
+async function renderOffer(){
+  document.getElementById('page-title').textContent='Offer Management';
+  document.getElementById('topbar-actions').innerHTML='';
+  const el=document.getElementById('page-content');
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400)">Loading…</div>';
+  try{
+    const cands=await cget('/candidates');
+    let offered=cands.filter(c=>c.interview_status==='Offered');
+    const ofClients=[...new Set(offered.map(c=>c.client_name).filter(Boolean))].sort();
+    const ofRecs=[...new Set(offered.map(c=>c.recruiter_name||'Unassigned'))].sort();
+    if(S.ofClient) offered=offered.filter(c=>c.client_name===S.ofClient);
+    if(S.ofRec) offered=offered.filter(c=>(c.recruiter_name||'Unassigned')===S.ofRec);
+    const cols=OFFER_STAGES.map(st=>{
+      const list=offered.filter(c=>(c.offer_stage||'Selected')===st);
+      return `<div style="flex:1;min-width:195px;background:#f7f9fc;border-radius:12px;padding:12px">
+        <div style="font-size:11.5px;font-weight:700;color:var(--g600);margin-bottom:10px">${st}
+          <span style="background:#fff;padding:1px 7px;border-radius:20px;font-size:10.5px">${list.length}</span></div>
+        ${list.map(c=>`<div style="background:#fff;border:1px solid rgba(15,41,66,.08);border-radius:10px;padding:11px;margin-bottom:9px">
+          <div style="font-size:13px;font-weight:600;color:var(--g800)">${esc(c.name)}</div>
+          <div style="font-size:11px;color:var(--g500);margin-top:2px">${esc(c.job_title)} · ${esc(c.client_name)}</div>
+          ${c.offer_ctc?`<div style="font-size:11px;color:var(--g600);margin-top:4px">CTC: ${esc(c.offer_ctc)}</div>`:''}
+          ${c.offer_joining?`<div style="font-size:11px;color:var(--g2);margin-top:2px">Joining ${fmtDate(c.offer_joining)}</div>`:''}
+          <button class="btn btn-outline btn-xs" style="width:100%;margin-top:8px" onclick="openOfferForm(${c.id})">Update</button>
+        </div>`).join('')||'<div style="font-size:12px;color:var(--g400);text-align:center;padding:12px 0">—</div>'}
+      </div>`;}).join('');
+    el.innerHTML=`<div class="filter-row">
+        <select class="form-select" onchange="S.ofClient=this.value||null;renderOffer()"><option value="">All Clients</option>
+          ${ofClients.map(c=>`<option ${S.ofClient===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+        <select class="form-select" onchange="S.ofRec=this.value||null;renderOffer()"><option value="">All Recruiters</option>
+          ${ofRecs.map(r=>`<option ${S.ofRec===r?'selected':''}>${esc(r)}</option>`).join('')}</select>
+        ${(S.ofClient||S.ofRec)?`<button class="btn btn-ghost btn-sm" onclick="S.ofClient=null;S.ofRec=null;renderOffer()">Clear</button>`:''}
+      </div>
+      <div style="font-size:12.5px;color:var(--g500);margin-bottom:14px">${offered.length} candidate(s) with an offer. Mark a candidate as <strong>Offered</strong> in Interviews to add them here.</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">${cols}</div>`;
+  }catch(e){ el.innerHTML=`<div class="empty-state"><p style="color:var(--r1)">${esc(e.message)}</p></div>`; }
+}
+async function openOfferForm(id){
+  const c=await api('GET',`/candidates/${id}`);
+  openModal(`Offer — ${c.name}`,`
+    <div class="form-row"><label class="form-label">Offer Stage</label>
+      <select class="form-select" id="o-stage">${OFFER_STAGES.map(s=>`<option ${(c.offer_stage||'Selected')===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="form-grid">
+      <div class="form-row"><label class="form-label">Offered CTC</label><input class="form-input" id="o-ctc" value="${esc(c.offer_ctc||'')}" placeholder="e.g. 18L fixed + 3L variable"></div>
+      <div class="form-row"><label class="form-label">Joining Date</label><input type="date" class="form-input" id="o-join" value="${esc((c.offer_joining||'').split('T')[0])}"></div>
+    </div>
+    <div class="form-row"><label class="form-label">Notes</label><textarea class="form-textarea" id="o-note" style="min-height:70px">${esc(c.offer_note||'')}</textarea></div>`,
+    `<button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveOffer(${id})">Save</button>`);
+}
+async function saveOffer(id){
+  const data={ offer_stage:document.getElementById('o-stage').value,
+    offer_ctc:document.getElementById('o-ctc').value.trim(),
+    offer_joining:document.getElementById('o-join').value,
+    offer_note:document.getElementById('o-note').value.trim() };
+  try{ await api('PUT',`/candidates/${id}`,data); bust(); closeModal(); toast('Offer updated'); renderOffer(); }
+  catch(e){ toast(e.message,'err'); }
+}
+
+// ══ TAB 6 — DATABASE ══
+async function renderDb(){
+  document.getElementById('page-title').textContent='Candidate Database';
+  const el=document.getElementById('page-content');
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400)">Loading…</div>';
+  try{
+    const cands=await cget('/candidates');
+    document.getElementById('topbar-actions').innerHTML=`<button class="btn btn-outline btn-sm" onclick="exportCands()">Export</button>`;
+    const orgs=[...new Set(cands.map(c=>c.last_org).filter(Boolean))].sort();
+    const locs=[...new Set(cands.map(c=>c.current_location).filter(Boolean))].sort();
+    const clients=[...new Set(cands.map(c=>c.client_name).filter(Boolean))].sort();
+    let f=cands;
+    if(S.dbOrg) f=f.filter(c=>c.last_org===S.dbOrg);
+    if(S.dbLoc) f=f.filter(c=>c.current_location===S.dbLoc);
+    if(S.dbClient) f=f.filter(c=>c.client_name===S.dbClient);
+    if(S.dbStatus) f=f.filter(c=>c.status===S.dbStatus);
+    const q=(S.dbq||'').toLowerCase();
+    if(q){ const t=q.split(/\s+/); f=f.filter(c=>{ const h=[c.name,c.job_title,c.client_name,c.last_org,c.last_designation,c.current_location,c.applying_location,c.recruiter_name].filter(Boolean).join(' ').toLowerCase(); return t.every(x=>h.includes(x)); }); }
+    const p=paginate(f,'db',10);
+    el.innerHTML=`
+      <div class="filter-row">
+        <input class="form-input" id="db-q" placeholder="Search the whole database…" value="${esc(S.dbq||'')}" style="max-width:250px">
+        <select class="form-select" onchange="S.dbClient=this.value||null;S.pg_db=1;renderDb()"><option value="">All Clients</option>${clients.map(o=>`<option ${S.dbClient===o?'selected':''}>${esc(o)}</option>`).join('')}</select>
+        <select class="form-select" onchange="S.dbOrg=this.value||null;S.pg_db=1;renderDb()"><option value="">All Previous Orgs</option>${orgs.map(o=>`<option ${S.dbOrg===o?'selected':''}>${esc(o)}</option>`).join('')}</select>
+        <select class="form-select" onchange="S.dbLoc=this.value||null;S.pg_db=1;renderDb()"><option value="">All Locations</option>${locs.map(o=>`<option ${S.dbLoc===o?'selected':''}>${esc(o)}</option>`).join('')}</select>
+        <select class="form-select" onchange="S.dbStatus=this.value||null;S.pg_db=1;renderDb()"><option value="">All Statuses</option>${STATUSES.map(s=>`<option ${S.dbStatus===s?'selected':''}>${s}</option>`).join('')}</select>
+        ${(S.dbq||S.dbOrg||S.dbLoc||S.dbClient||S.dbStatus)?`<button class="btn btn-ghost btn-sm" onclick="S.dbq='';S.dbOrg=null;S.dbLoc=null;S.dbClient=null;S.dbStatus=null;renderDb()">Clear</button>`:''}
+        <span style="margin-left:auto;font-size:12.5px;color:var(--g400)">${f.length} of ${cands.length}</span>
+        ${viewToggle('db','renderDb()')}
+      </div>
+      ${(S.v_db||'list')==='cards'
+        ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:14px">
+            ${p.slice.map(c=>`<div class="card" style="padding:16px">
+              <div class="td-link" style="font-size:14px;font-weight:700" onclick="openCandForm(${c.id})">${esc(c.name)}</div>
+              <div style="font-size:11.5px;color:var(--g500);margin-top:2px">${esc(c.last_designation||'—')}${c.last_org?` @ ${esc(c.last_org)}`:''}</div>
+              <div style="margin-top:9px">${badge(c.status,ST_CLR)}</div>
+              <div style="font-size:12px;color:var(--g600);margin-top:9px">${esc(c.current_location||'—')} · CTC ${esc(c.current_ctc||'—')} → ${esc(c.expected_ctc||'—')}</div>
+              <div style="display:flex;gap:5px;margin-top:11px">
+                <button class="btn btn-outline btn-xs" style="flex:1" onclick="openCandForm(${c.id})">Open</button>
+                ${c.cv?`<a class="btn btn-ghost btn-xs" href="/api/candidates/${c.id}/cv/download" target="_blank">CV</a>`:''}</div>
+            </div>`).join('')}</div>`
+        : `<div class="tbl-wrap"><table style="min-width:1100px">
+            <thead><tr><th style="width:32px"><input type="checkbox" onchange="document.querySelectorAll('.cd-chk').forEach(x=>x.checked=this.checked)" style="width:auto"></th>
+              <th>Candidate</th><th>Applied For</th><th>Client</th><th>Previous Org</th><th>Designation</th><th>Location</th><th>Current CTC</th><th>Expected</th><th>Status</th><th>CV</th></tr></thead>
+            <tbody>${p.slice.map(c=>`<tr>
+              <td><input type="checkbox" class="cd-chk" value="${c.id}" style="width:auto"></td>
+              <td><div class="td-link" onclick="openCandForm(${c.id})">${esc(c.name)}</div></td>
+              <td style="font-size:12px">${esc(c.job_title)}</td>
+              <td style="font-size:12px">${esc(c.client_name)}</td>
+              <td style="font-size:12px">${esc(c.last_org||'—')}</td>
+              <td style="font-size:12px">${esc(c.last_designation||'—')}</td>
+              <td style="font-size:12px">${esc(c.current_location||'—')}</td>
+              <td style="font-size:12px">${esc(c.current_ctc||'—')}</td>
+              <td style="font-size:12px;font-weight:600">${esc(c.expected_ctc||'—')}</td>
+              <td>${badge(c.status,ST_CLR)}</td>
+              <td>${c.cv?`<a class="btn btn-outline btn-xs" href="/api/candidates/${c.id}/cv/download" target="_blank">CV</a>`:'—'}</td>
+            </tr>`).join('')||'<tr><td colspan="11"><div class="empty-state"><div class="ei">🔍</div><h3>No candidates match</h3></div></td></tr>'}
+            </tbody></table></div>`}
+      ${pager(p,'db','renderDb()')}`;
+    const qi=document.getElementById('db-q');
+    if(qi){ let t; qi.addEventListener('input',()=>{ clearTimeout(t); t=setTimeout(()=>{ S.dbq=qi.value; S.pg_db=1; renderDb();
+      const n=document.getElementById('db-q'); if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length);} },200); }); }
+  }catch(e){ el.innerHTML=`<div class="empty-state"><p style="color:var(--r1)">${esc(e.message)}</p></div>`; }
+}
+
+// ══ TAB 7 — ADMIN PANEL ══
+async function renderAdmin(){
+  document.getElementById('page-title').textContent='Admin Panel';
+  const el=document.getElementById('page-content');
+  if(S.user.role!=='admin'){ el.innerHTML='<div class="empty-state"><div class="ei">🔒</div><h3>Admins only</h3></div>'; return; }
+  const tab=S.adminTab||'overview';
+  document.getElementById('topbar-actions').innerHTML = tab==='overview'
+    ? `<button class="btn btn-primary" onclick="openUserForm()">+ Add User</button>` : '';
+  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400)">Loading…</div>';
+  if(tab==='alerts'){ renderAdminAlerts(); return; }
+  try{
+    const [users,perf,activity]=await Promise.all([
+      api('GET','/admin/users'), api('GET','/admin/recruiter-analysis'),
+      api('GET','/analytics/activity?limit=40')]);
+    S.users=users;
+    el.innerHTML=adminTabs(S.alertCount)+`
+      <div class="metrics">
+        ${metricCard('Users',users.filter(u=>u.is_active).length,{color:'blue',icon:'👤'})}
+        ${metricCard('Admins',users.filter(u=>u.role==='admin'&&u.is_active).length,{color:'purple',icon:'🛡'})}
+        ${metricCard('Recruiters',users.filter(u=>u.role==='recruiter'&&u.is_active).length,{color:'teal',icon:'🧑‍💼'})}
+        ${metricCard('Inactive',users.filter(u=>!u.is_active).length,{color:'gray',icon:'🚫'})}
+      </div>
+      <div class="card" style="margin-bottom:16px"><div class="card-hdr"><h3>Recruiter Analysis</h3></div>
+        <div class="tbl-wrap" style="border:none;box-shadow:none"><table>
+          <thead><tr><th>Recruiter</th><th>Role</th><th>Total CVs</th><th>Submitted</th><th>Shortlisted</th><th>Rejected</th><th>Offered</th><th>Shortlist Rate</th><th>Last Login</th></tr></thead>
+          <tbody>${perf.map(r=>`<tr>
+            <td class="td-name">${esc(r.name)}</td><td><span class="badge bdg-gray">${esc(r.role)}</span></td>
+            <td>${r.total}</td><td>${r.submitted}</td><td>${r.shortlisted}</td><td>${r.rejected}</td><td>${r.offered}</td>
+            <td><span class="badge ${r.shortlist_rate>=30?'bdg-green':r.shortlist_rate>=15?'bdg-amber':'bdg-gray'}">${r.shortlist_rate}%</span></td>
+            <td style="font-size:12px;color:var(--g500)">${r.last_login?new Date(r.last_login).toLocaleDateString('en-IN'):'never'}</td>
+          </tr>`).join('')||'<tr><td colspan="9" style="text-align:center;padding:22px;color:var(--g400)">No data</td></tr>'}
+        </tbody></table></div></div>
+      <div class="card" style="margin-bottom:16px"><div class="card-hdr"><h3>Users</h3></div>
+        <div class="tbl-wrap" style="border:none;box-shadow:none"><table>
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${users.map(u=>`<tr>
+            <td class="td-name">${esc(u.full_name)}</td><td style="font-size:12.5px">${esc(u.email)}</td>
+            <td><span class="badge ${u.role==='admin'?'bdg-purple':'bdg-teal'}">${u.role==='admin'?'Admin':'Recruiter'}</span></td>
+            <td><span class="badge ${u.is_active?'bdg-green':'bdg-red'}">${u.is_active?'Active':'Inactive'}</span></td>
+            <td><div style="display:flex;gap:5px">
+              <button class="btn btn-ghost btn-xs" onclick="openUserForm(${u.id})">Edit</button>
+              ${u.id!==S.user.id?`<button class="btn btn-danger btn-xs" onclick="delUser(${u.id})">Delete</button>`:''}
+            </div></td></tr>`).join('')}</tbody></table></div></div>
+      <div class="card"><div class="card-hdr"><h3>Recent Activity</h3></div><div class="card-body" style="max-height:380px;overflow-y:auto">
+        ${activity.map(l=>`<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--g100)">
+          <span class="badge bdg-gray" style="height:fit-content">${esc(l.entity_type)}</span>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--g800)">${esc(l.action)}${l.detail?` — ${esc(l.detail)}`:''}</div>
+          <div style="font-size:11px;color:var(--g400);margin-top:2px">${esc(l.actor)} · ${new Date(l.at).toLocaleString('en-IN')}</div></div>
+        </div>`).join('')||'<div style="text-align:center;padding:20px;color:var(--g400)">No activity yet</div>'}
+      </div></div>`;
+  }catch(e){ el.innerHTML=`<div class="empty-state"><p style="color:var(--r1)">${esc(e.message)}</p></div>`; }
+}
+function openUserForm(id){
+  const u=(S.users||[]).find(x=>x.id===id)||{};
+  openModal(id?'Edit User':'Add User',`
+    <div class="form-grid">
+      <div class="form-row"><label class="form-label">Full Name<span class="req">*</span></label>
+        <input class="form-input" id="u-name" value="${esc(u.full_name||'')}"></div>
+      <div class="form-row"><label class="form-label">Email<span class="req">*</span></label>
+        <input class="form-input" id="u-email" type="email" value="${esc(u.email||'')}" ${id?'disabled':''}></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row"><label class="form-label">Role</label>
+        <select class="form-select" id="u-role">
+          <option value="recruiter" ${u.role==='recruiter'?'selected':''}>Recruiter</option>
+          <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></div>
+      <div class="form-row"><label class="form-label">${id?'New Password (optional)':'Password'}${id?'':'<span class="req">*</span>'}</label>
+        <input class="form-input" id="u-pass" type="password" placeholder="${id?'Leave blank to keep':'Set a password'}"></div>
+    </div>
+    ${id?`<label style="font-size:12.5px;display:flex;align-items:center;gap:8px;cursor:pointer">
+      <input type="checkbox" id="u-active" ${u.is_active?'checked':''} style="width:auto"> Active</label>`:''}`,
+    `<button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveUser(${id||0})">${id?'Save Changes':'Create User'}</button>`);
+}
+async function saveUser(id){
+  const full_name=document.getElementById('u-name').value.trim();
+  const email=document.getElementById('u-email').value.trim();
+  const password=document.getElementById('u-pass').value;
+  const role=document.getElementById('u-role').value;
+  if(!full_name){ toast('Name is required','err'); return; }
+  if(!id&&(!email||!password)){ toast('Email and password are required','err'); return; }
+  try{
+    if(id){ const d={full_name,role,is_active:document.getElementById('u-active').checked};
+      if(password) d.password=password; await api('PUT',`/admin/users/${id}`,d); }
+    else await api('POST','/admin/users',{full_name,email,password,role});
+    closeModal(); toast(id?'User updated':'User created'); renderAdmin();
+  }catch(e){ toast(e.message,'err'); }
+}
+async function delUser(id){
+  if(!confirm('Delete this user?'))return;
+  try{ await api('DELETE',`/admin/users/${id}`); toast('User deleted'); renderAdmin(); }
+  catch(e){ toast(e.message,'err'); }
+}
+
+function adminTabs(count){
+  const t=S.adminTab||'overview';
+  return `<div class="subtabs">
+    <button class="subtab ${t==='overview'?'active':''}" onclick="S.adminTab='overview';renderAdmin()">Overview</button>
+    <button class="subtab ${t==='alerts'?'active':''}" onclick="S.adminTab='alerts';renderAdmin()">Alerts${count?` <span class="cnt">${count}</span>`:''}</button>
+  </div>`;
+}
+async function renderAdminAlerts(){
+  const el=document.getElementById('page-content');
+  el.innerHTML=adminTabs(S.alertCount)+'<div style="text-align:center;padding:40px;color:var(--g400)">Loading…</div>';
+  try{
+    const d=await api('GET','/analytics/alerts');
+    S.alertCount=d.count;
+    let f=d.alerts;
+    if(S.alRec) f=f.filter(a=>a.recruiter===S.alRec);
+    if(S.alJob) f=f.filter(a=>a.job_id===Number(S.alJob));
+    if(S.alSev) f=f.filter(a=>a.severity===S.alSev);
+    const recs=[...new Set(d.alerts.map(a=>a.recruiter))].sort();
+    const jobs=[...new Map(d.alerts.map(a=>[a.job_id,a.job_title])).entries()];
+    const p=paginate(f,'al',10);
+    el.innerHTML=adminTabs(d.count)+`
+      <div style="background:var(--ap);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:#92590e">
+        A candidate appears here when their status hasn't moved for <strong>4+ days</strong>.
+        They drop off automatically the moment the status is updated, or once they're <strong>HR Rejected</strong> or <strong>Offered</strong>.
+      </div>
+      <div class="filter-row">
+        <select class="form-select" onchange="S.alRec=this.value||null;S.pg_al=1;renderAdminAlerts()"><option value="">All Recruiters</option>
+          ${recs.map(r=>`<option ${S.alRec===r?'selected':''}>${esc(r)}</option>`).join('')}</select>
+        <select class="form-select" onchange="S.alJob=this.value||null;S.pg_al=1;renderAdminAlerts()"><option value="">All Jobs</option>
+          ${jobs.map(([id,t])=>`<option value="${id}" ${S.alJob==id?'selected':''}>${esc(t)}</option>`).join('')}</select>
+        <select class="form-select" onchange="S.alSev=this.value||null;S.pg_al=1;renderAdminAlerts()"><option value="">All Ages</option>
+          <option value="low" ${S.alSev==='low'?'selected':''}>4–6 days</option>
+          <option value="medium" ${S.alSev==='medium'?'selected':''}>7–9 days</option>
+          <option value="high" ${S.alSev==='high'?'selected':''}>10+ days</option></select>
+        ${(S.alRec||S.alJob||S.alSev)?`<button class="btn btn-ghost btn-sm" onclick="S.alRec=null;S.alJob=null;S.alSev=null;renderAdminAlerts()">Clear</button>`:''}
+        <span style="margin-left:auto;font-size:12.5px;color:var(--g400)">${f.length} of ${d.count} stale</span>
+      </div>
+      ${f.length?`<div class="tbl-wrap"><table style="min-width:900px">
+        <thead><tr><th>Candidate</th><th>Job / Client</th><th>Current Status</th><th>Interview</th><th>Recruiter</th><th>Idle</th><th>Action</th></tr></thead>
+        <tbody>${p.slice.map(a=>{
+          const col=a.severity==='high'?'#e8615a':a.severity==='medium'?'#f0a02a':'#2563c9';
+          return `<tr>
+            <td><div class="td-link" onclick="openCandForm(${a.id})">${esc(a.name)}</div></td>
+            <td style="font-size:12px">${esc(a.job_title)}<div class="td-sub">${esc(a.client_name)}</div></td>
+            <td>${badge(a.status,ST_CLR)}</td>
+            <td>${a.interview_status?badge(a.interview_status,IS_CLR):'<span style="color:var(--g400)">—</span>'}</td>
+            <td style="font-size:12px">${esc(a.recruiter)}</td>
+            <td><span class="badge" style="background:${col}1a;color:${col}">${a.days} days</span>
+              <div class="td-sub">since ${fmtDate(a.last_touch)}</div></td>
+            <td><button class="btn btn-primary btn-xs" onclick="openCandForm(${a.id})">Update</button></td>
+          </tr>`;}).join('')}</tbody></table></div>${pager(p,'al','renderAdminAlerts()')}`
+        :'<div class="empty-state"><div class="ei">✅</div><h3>Nothing stale</h3><p>Every candidate has been updated within the last 4 days.</p></div>'}`;
+  }catch(e){ el.innerHTML=adminTabs()+`<div class="empty-state"><p style="color:var(--r1)">${esc(e.message)}</p></div>`; }
+}
+
+// ══ BOOT ══
+window.addEventListener('resize',()=>{
+  if(window.innerWidth>860){ document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open'); }
+  else document.body.classList.remove('sb-collapsed');
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape')closeModal(); });
+['li-email','li-pass'].forEach(id=>{ const el=document.getElementById(id);
+  if(el) el.addEventListener('keydown',e=>{ if(e.key==='Enter')doLogin(); }); });
+(async()=>{
+  try{ const me=await api('GET','/auth/me'); S.user={id:me.id,email:me.email,fullName:me.fullName,role:me.role}; startApp(); }
+  catch(e){ showLogin(); }
+})();
+</script>
+</body>
+</html>
